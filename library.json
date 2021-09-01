@@ -1,0 +1,20 @@
+{
+  "name": "SProto",
+  "version": "0.0.1",
+  "description": "Communication protocol",
+  "keywords": "SProto",
+  "authors":
+  {
+    "name":  "HTotoo",
+    "url":   "https://github.com/htotoo",
+    "maintainer": true
+  },
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/htotoo/SProto.git"
+  },
+  "homepage": "https://github.com/htotoo/SProto.git",
+  "frameworks": [ "arduino"],
+  "platforms": "esp32"
+}
