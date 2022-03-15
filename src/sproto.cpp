@@ -62,7 +62,7 @@ uint32_t SProto::CalculateCommandDataLength(uint16_t cmd)
     case SPROTO_CMD_SMEAS:
       return 0;
     default:
-      return SProto::CalculateCommandDataLength(cmd);
+      return SProto::CalculateCommandDataLengthImp(cmd);
   }
 }
 
@@ -189,6 +189,9 @@ uint32_t SProto::CalculateMeasurementDataLength(uint16_t dataType, bool withHead
     case SPROTO_MEASID_SNR:
       ret += sizeof(SPM_Snr);
       break;
+    case SPROTO_MEASID_STAIONNAME:
+      ret += sizeof(SPM_StationName);
+      break;
     case SPROTO_MEASID_INVALID:
       break;
     default:
@@ -283,7 +286,7 @@ uint16_t SProto::GetCmdFromPacket(uint8_t* packet)
   return *(uint16_t*)&packet[SPROTO_HEADER_POS_CMD];
 }
 
-bool SProto::MeasParseDataPart(uint8_t* packet, uint32_t offset, SPROTO_MEADHEADERSTRUCT* result)
+bool SProto::MeasParseDataPart(uint8_t* packet, uint32_t offset, SPROTO_MEASHEADERSTRUCT* result)
 {
   result->measTypeId = *(uint16_t*)&packet[offset + SPROTO_MEASHEADER_POS_TYPE];
   result->serial = packet[offset + SPROTO_MEASHEADER_POS_SERNUM];
@@ -293,9 +296,22 @@ bool SProto::MeasParseDataPart(uint8_t* packet, uint32_t offset, SPROTO_MEADHEAD
 }
 
 
+
+void SProto::HelpCopyStationName(SPM_StationName* dest, char* from, size_t len)
+{
+  int max = len - 1; //convert to index
+  if (max > 15) max = 14; //max 15 chars, from 0-14. 15 is the trailing 0
+  for (int i = 0; i<16; ++i) 
+  {
+    if (i<max) { dest->x[i] = from[i]; } else { dest->x[i] = 0; }
+  }
+}
+
+
 #ifdef SPROTO_MQTTHELPER
 uint8_t SProto::GetHADeviceTypeId(uint16_t dataType)
 {
+  if (dataType == SPROTO_MEASID_STAIONNAME) return SPROTO_MQTT_DEVTYPEID_SENSOR;
   if (dataType == SPROTO_MEASID_NETID) return SPROTO_MQTT_DEVTYPEID_UNKNOWN;
   if (dataType == SPROTO_MEASID_TIME) return SPROTO_MQTT_DEVTYPEID_SENSOR;
   if (dataType == SPROTO_MEASID_TEMPERATURE) return SPROTO_MQTT_DEVTYPEID_SENSOR;
@@ -335,6 +351,7 @@ uint8_t SProto::GetHADeviceTypeId(uint16_t dataType)
 
 const char* SProto::GetDataTypeStr(uint16_t dataType)
 {
+  if (dataType == SPROTO_MEASID_STAIONNAME) return "stationname";
   if (dataType == SPROTO_MEASID_NETID) return "netid";
   if (dataType == SPROTO_MEASID_TIME) return "time";
   if (dataType == SPROTO_MEASID_TEMPERATURE) return "temparature";
@@ -373,6 +390,7 @@ const char* SProto::GetDataTypeStr(uint16_t dataType)
 }
 const char* SProto::GetDataTypeUnitStr(uint16_t dataType)
 {
+  if (dataType == SPROTO_MEASID_STAIONNAME) return "";
   if (dataType == SPROTO_MEASID_NETID) return "";
   if (dataType == SPROTO_MEASID_TIME) return "";
   if (dataType == SPROTO_MEASID_TEMPERATURE) return "°C";
@@ -520,11 +538,17 @@ void SProto::PrintMeasDataDetails(uint8_t* packet)
   uint32_t dl = *(uint32_t*)&packet[SPROTO_HEADER_POS_DATALENGTH];
   uint32_t offset = SPROTO_HEADER_LENGTH;
   dl += SPROTO_HEADER_LENGTH; //last data byte
-  SPROTO_MEADHEADERSTRUCT dataHead;
+  SPROTO_MEASHEADERSTRUCT dataHead;
   while (offset < dl)
   {
     SProto::MeasParseDataPart(packet, offset, &dataHead);
     printf("Data meas type: %hu\n", dataHead.measTypeId);
+    if (dataHead.measTypeId == SPROTO_MEASID_STAIONNAME)
+    {
+      SPM_StationName tmp;
+      SProto::MeasGetDataPart(packet, offset, &tmp);
+      printf("Station name: %s\n", tmp.x);
+    }
     if (dataHead.measTypeId == SPROTO_MEASID_NETID)
     {
       SPM_NetId tmp;

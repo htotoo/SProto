@@ -37,7 +37,7 @@ void ParseDataPacket()
   uint32_t dl = *(uint32_t*)&packet[SPROTO_HEADER_POS_DATALENGTH];
   uint32_t offset = SPROTO_HEADER_LENGTH;
   dl += SPROTO_HEADER_LENGTH; //last data byte
-  SPROTO_MEADHEADERSTRUCT dataHead;
+  SPROTO_MEASHEADERSTRUCT dataHead;
   while (offset < dl)
   {
     SProto::MeasParseDataPart(packet, offset, &dataHead);

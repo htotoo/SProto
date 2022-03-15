@@ -19,8 +19,15 @@
 
 //COMMANDS
 
+//client sends measurement datas to server
 #define SPROTO_CMD_CMEAS 0x8001
+//server requests the current measurement datas (newest)
 #define SPROTO_CMD_SMEAS 0x0001
+//server requests the current measurement datas (oldest)
+#define SPROTO_CMD_SMEASHIST 0x0002
+//server requests the stations name
+#define SPROTO_CMD_SGETSTATIONNAME 0x0003
+//server requests the client to reboot
 #define SPROTO_CMD_SRESTART 0xfffe
 
 
@@ -71,11 +78,16 @@
 #define SPROTO_MEASID_RADSPECTRUM2048 102
 #define SPROTO_MEASID_RADSPECTRUM4096 103
 
+#define SPROTO_MEASID_STAIONNAME 0xfffd
 #define SPROTO_MEASID_REMAININGDATA 0xfffe
 #define SPROTO_MEASID_INVALID 0xffff
 
 //DATA FORMATS
 
+struct SPM_StationName
+{
+  char x[16]; //max 15 char
+};
 struct SPM_NetId {
   uint8_t x[6];
 }; //6 byte network id
@@ -285,6 +297,42 @@ struct SPM_RadSpect4096 {
 #define SPROTO_TIME_MAX_50Y 114
 #define SPROTO_TIME_MAX_100Y 115
 
+#define SPROTO_TIME_SUM_1S 120
+#define SPROTO_TIME_SUM_5S 121
+#define SPROTO_TIME_SUM_15S 122
+#define SPROTO_TIME_SUM_30S 123
+#define SPROTO_TIME_SUM_1M 124
+#define SPROTO_TIME_SUM_5M 125
+#define SPROTO_TIME_SUM_10M 126
+#define SPROTO_TIME_SUM_15M 127
+#define SPROTO_TIME_SUM_30M 128
+#define SPROTO_TIME_SUM_1H 129
+#define SPROTO_TIME_SUM_1p5H 130
+#define SPROTO_TIME_SUM_2H 131
+#define SPROTO_TIME_SUM_3H 132
+#define SPROTO_TIME_SUM_4H 133
+#define SPROTO_TIME_SUM_8H 134
+#define SPROTO_TIME_SUM_12H 135
+#define SPROTO_TIME_SUM_1D 136
+#define SPROTO_TIME_SUM_2D 137
+#define SPROTO_TIME_SUM_3D 138
+#define SPROTO_TIME_SUM_5D 139
+#define SPROTO_TIME_SUM_7D 140
+#define SPROTO_TIME_SUM_14D 141
+#define SPROTO_TIME_SUM_30D 142
+#define SPROTO_TIME_SUM_60D 143
+#define SPROTO_TIME_SUM_90D 144
+#define SPROTO_TIME_SUM_120D 145
+#define SPROTO_TIME_SUM_180D 146
+#define SPROTO_TIME_SUM_1Y 147
+#define SPROTO_TIME_SUM_2Y 148
+#define SPROTO_TIME_SUM_5Y 149
+#define SPROTO_TIME_SUM_10Y 150
+#define SPROTO_TIME_SUM_15Y 151
+#define SPROTO_TIME_SUM_30Y 152
+#define SPROTO_TIME_SUM_50Y 153
+#define SPROTO_TIME_SUM_100Y 154
+
 #define SPROTO_TIME_ANY 255
 
 //Encryption defaults.
@@ -297,7 +345,7 @@ struct SPM_RadSpect4096 {
 #ifndef SPROTO_ENCRYPTIONPARAM_XOR_SIZE
     #define SPROTO_ENCRYPTIONPARAM_XOR_SIZE 4
 #endif
-struct SPROTO_MEADHEADERSTRUCT
+struct SPROTO_MEASHEADERSTRUCT
 {
   uint16_t measTypeId;
   uint8_t serial;

@@ -67,7 +67,7 @@ class SProto
     static bool IsValidPacket(uint8_t* packet);
     static uint32_t GetFullPacketLength(uint8_t* packet);
     static void DecryptData(uint8_t* packet);
-    static bool MeasParseDataPart(uint8_t* packet, uint32_t offset, SPROTO_MEADHEADERSTRUCT* result);
+    static bool MeasParseDataPart(uint8_t* packet, uint32_t offset, SPROTO_MEASHEADERSTRUCT* result);
     template <typename  T>
     static uint32_t MeasGetDataPart(uint8_t* packet, uint32_t offset, T* result)
     {
@@ -83,6 +83,8 @@ class SProto
     static void DecryptionXor(uint8_t* data, uint32_t length) {
       SProto::EncryptionXor(data, length);  //since it is the same
     }
+    static void HelpCopyStationName(SPM_StationName* dest, char* from, size_t len);
+    //config
     static uint8_t XorBytes[]; //xor encryption byte array;
     static size_t XorByteCount; //xor encryption byte array element count
 #ifdef SPROTO_MQTTHELPER
