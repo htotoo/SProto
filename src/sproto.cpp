@@ -349,6 +349,16 @@ uint8_t SProto::GetHADeviceTypeId(uint16_t dataType)
   return SPROTO_MQTT_DEVTYPEID_UNKNOWN;
 }
 
+
+const char* SProto::GetHADevStringByHaDevType(uint8_t devType)
+{
+  if (devType == SPROTO_MQTT_DEVTYPEID_SENSOR) return "sensor";
+  if (devType == SPROTO_MQTT_DEVTYPEID_DEVTRACKER) return "device_tracker";
+  if (devType == SPROTO_MQTT_DEVTYPEID_LIGHT) return "light";
+  if (devType == SPROTO_MQTT_DEVTYPEID_BINARYSENSOR) return "binary_sensor";
+  return "";    
+}
+
 const char* SProto::GetDataTypeStr(uint16_t dataType)
 {
   if (dataType == SPROTO_MEASID_STAIONNAME) return "stationname";
@@ -428,36 +438,34 @@ const char* SProto::GetDataTypeUnitStr(uint16_t dataType)
   return "";
 }
 
-String SProto::GetMQTTDataTopic(const char* hostname, const char* mqttPrefix, uint16_t measTypeId, uint8_t dataSerNum, uint8_t timeFrame)
+String SProto::GetMQTTDataTopic(const char* hostname,  const char* stationId, const char* mqttPrefix, uint16_t measTypeId, uint8_t dataSerNum, uint8_t timeFrame)
 {
   String ret = String(mqttPrefix);
   ret = ret + String(hostname);
+  ret = ret + String("-");
+  ret = ret + String(stationId);
   ret = ret + String("/");
   ret = ret + String(SProto::GetDataTypeStr(measTypeId));
   ret = ret + String("-");
   ret = ret + String(dataSerNum);
-  if (timeFrame > 0)
-  {
-    ret = ret + String("-");
-    ret = ret + String(timeFrame);
-  }
+  ret = ret + String("-");
+  ret = ret + String(timeFrame);
   ret = ret + String("/state");
   return ret;
 }
 
-String SProto::GetMQTTAttributesTopic(const char* hostname, const char* mqttPrefix, uint16_t measTypeId, uint8_t dataSerNum, uint8_t timeFrame)
+String SProto::GetMQTTAttributesTopic(const char* hostname,  const char* stationId, const char* mqttPrefix, uint16_t measTypeId, uint8_t dataSerNum, uint8_t timeFrame)
 {
   String ret = String(mqttPrefix);
   ret = ret + String(hostname);
+  ret = ret + String("-");
+  ret = ret + String(stationId);
   ret = ret + String("/");
   ret = ret + String(SProto::GetDataTypeStr(measTypeId));
   ret = ret + String("-");
   ret = ret + String(dataSerNum);
-  if (timeFrame > 0)
-  {
-    ret = ret + String("-");
-    ret = ret + String(timeFrame);
-  }
+  ret = ret + String("-");
+  ret = ret + String(timeFrame);
   ret = ret + String("/attributes");
   return ret;
 }

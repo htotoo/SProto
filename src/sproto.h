@@ -89,10 +89,11 @@ class SProto
     static size_t XorByteCount; //xor encryption byte array element count
 #ifdef SPROTO_MQTTHELPER
     static uint8_t GetHADeviceTypeId(uint16_t dataType);
+    static const char* GetHADevStringByHaDevType(uint8_t devType);
     static const char* GetDataTypeStr(uint16_t dataType);
     static const char* GetDataTypeUnitStr(uint16_t dataType);
-    static String GetMQTTDataTopic(const char* hostname, const char* mqttPrefix, uint16_t measTypeId, uint8_t dataSerNum, uint8_t timeFrame = SPROTO_TIME_INSTANT);
-    static String GetMQTTAttributesTopic(const char* hostname, const char* mqttPrefix, uint16_t measTypeId, uint8_t dataSerNum, uint8_t timeFrame = SPROTO_TIME_INSTANT);
+    static String GetMQTTDataTopic(const char* hostname, const char* stationId, const char* mqttPrefix, uint16_t measTypeId, uint8_t dataSerNum, uint8_t timeFrame = SPROTO_TIME_INSTANT);
+    static String GetMQTTAttributesTopic(const char* hostname, const char* stationId,  const char* mqttPrefix, uint16_t measTypeId, uint8_t dataSerNum, uint8_t timeFrame = SPROTO_TIME_INSTANT);
 #endif
     //debug functions
 #ifdef SPROTO_DEBUG
