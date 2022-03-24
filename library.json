@@ -1,7 +1,7 @@
 {
   "name": "SProto",
-  "version": "0.1.0",
-  "description": "Communication protocol",
+  "version": "0.2.0",
+  "description": "Communication protocol for IoT devices.",
   "keywords": "SProto",
   "authors":
   {

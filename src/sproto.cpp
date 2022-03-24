@@ -18,6 +18,17 @@ uint32_t SProto::CreateHeader(uint8_t* packet, uint16_t cmd, uint32_t dataLength
   return SPROTO_HEADER_LENGTH; //used from the array, to help positioning
 }
 
+uint32_t SProto::CreateHeaderMini(uint8_t* packet, uint16_t cmd, uint32_t dataLength)
+{
+  packet[SPROTO_HEADER_POS_STARTBYTE] = SPROTO_STARTBYTEMINI;
+  packet[SPROTO_HEADER_POS_PROTOVER] = SPROTO_VERSION;
+  *(uint32_t*)(&packet[SPROTO_HEADER_POS_DATALENGTH]) = dataLength;
+  *(uint16_t*)(&packet[SPROTO_HEADER_POS_CMD]) = cmd;
+  packet[SPROTO_HEADER_POS_CRCMINI] = 0;
+  SProto::UpdateHeaderCrc(packet);
+  return SPROTO_HEADER_LENGTHMINI; //used from the array, to help positioning
+}
+
 void SProto::UpdateHeaderDataSize(uint8_t* packet, uint32_t dataLength)
 {
   packet[SPROTO_HEADER_POS_DATALENGTH] = dataLength;
@@ -26,13 +37,21 @@ void SProto::UpdateHeaderDataSize(uint8_t* packet, uint32_t dataLength)
 
 void SProto::UpdateHeaderEncryption(uint8_t* packet, uint8_t encryption)
 {
+  if (SPROTO_STARTBYTEMINI == packet[SPROTO_HEADER_POS_STARTBYTE]) return;
   packet[SPROTO_HEADER_POS_ENCRYPTION] = encryption;
   SProto::UpdateHeaderCrc(packet);
 }
 
 void SProto::UpdateHeaderCrc(uint8_t* packet)
 {
-  packet[SPROTO_HEADER_POS_CRC] = SProto::CalcCrc8(packet, SPROTO_HEADER_LENGTH - 1);
+  if (SPROTO_STARTBYTEMINI == packet[SPROTO_HEADER_POS_STARTBYTE]) 
+  {
+    packet[SPROTO_HEADER_POS_CRCMINI] = SProto::CalcCrc8(packet, SPROTO_HEADER_LENGTHMINI - 1);
+  }
+  else
+  {
+    packet[SPROTO_HEADER_POS_CRC] = SProto::CalcCrc8(packet, SPROTO_HEADER_LENGTH - 1);
+  }
 }
 
 uint16_t SProto::CalcCrc16(uint8_t* byteArrStart, uint32_t length, uint16_t initial) {
@@ -52,6 +71,13 @@ uint8_t SProto::CalcCrc8(uint8_t* byteArrStart, uint32_t length, uint8_t initial
   }
   return ret;
 }
+
+uint32_t SProto::GetHeaderLength(uint8_t* packet)
+{
+  if (packet[SPROTO_HEADER_POS_STARTBYTE] == SPROTO_STARTBYTEMINI) return SPROTO_HEADER_LENGTHMINI;
+  return SPROTO_HEADER_LENGTH;
+}
+
 
 uint32_t SProto::CalculateCommandDataLength(uint16_t cmd)
 {
@@ -209,43 +235,54 @@ void SProto::MeasurementCreateHeader(uint8_t* dataPart, uint16_t dataType, uint8
 
 bool SProto::IsValidHeader(uint8_t* packet)
 {
-  if (packet[SPROTO_HEADER_POS_STARTBYTE] != SPROTO_STARTBYTE) return false;
   if (packet[SPROTO_HEADER_POS_PROTOVER] != SPROTO_VERSION) return false;
-  uint8_t crc = SProto::CalcCrc8(packet, SPROTO_HEADER_LENGTH - 1);
-  if (packet[SPROTO_HEADER_POS_CRC] != crc) return false;
-  return true;
+  if (packet[SPROTO_HEADER_POS_STARTBYTE] == SPROTO_STARTBYTE)
+  {
+    uint8_t crc = SProto::CalcCrc8(packet, SPROTO_HEADER_LENGTH - 1);
+    return (packet[SPROTO_HEADER_POS_CRC] == crc);
+  }
+  if (packet[SPROTO_HEADER_POS_STARTBYTE] == SPROTO_STARTBYTEMINI)
+  {
+    uint8_t crc = SProto::CalcCrc8(packet, SPROTO_HEADER_LENGTHMINI - 1);
+    return (packet[SPROTO_HEADER_POS_CRCMINI] == crc);
+  }
+  return false;
 }
 
 uint32_t SProto::UpdateDataCrc(uint8_t* packet)
 {
   if (!SProto::IsValidHeader(packet)) return 0;
   uint32_t dl = *(uint32_t*)&packet[SPROTO_HEADER_POS_DATALENGTH];
-  *(uint16_t*)(&(packet[SPROTO_HEADER_LENGTH + dl])) = SProto::CalcCrc16(&packet[SPROTO_HEADER_LENGTH], dl);
-  return SPROTO_HEADER_LENGTH + dl + 2;
+  uint32_t headerEnd = GetHeaderLength(packet);
+  *(uint16_t*)(&(packet[headerEnd + dl])) = SProto::CalcCrc16(&packet[headerEnd], dl);
+  return headerEnd + dl + 2;
 }
 
 bool SProto::IsValidData(uint8_t* packet)
 {
-  if (!SProto::IsValidHeader(packet)) return 0;
+  if (!SProto::IsValidHeader(packet)) return false;
   uint32_t dl = *(uint32_t*)&packet[SPROTO_HEADER_POS_DATALENGTH];
-  uint16_t crc = SProto::CalcCrc16(&packet[SPROTO_HEADER_LENGTH], dl);
-  return (*(uint16_t*)(&(packet[SPROTO_HEADER_LENGTH + dl])) == crc);
+  uint32_t headerEnd = GetHeaderLength(packet);
+  uint16_t crc = SProto::CalcCrc16(&packet[headerEnd], dl);
+  return (*(uint16_t*)(&(packet[headerEnd + dl])) == crc);
 }
 
 bool SProto::IsValidPacket(uint8_t* packet)
 {
-  return (IsValidHeader(packet)); //also uses the header check
+  return (IsValidData(packet)); //also uses the header check
 }
 
 uint32_t SProto::GetFullPacketLength(uint8_t* packet)
 {
   if (!SProto::IsValidHeader(packet)) return 0;
   uint32_t dl = *(uint32_t*)&packet[SPROTO_HEADER_POS_DATALENGTH];
-  return SPROTO_HEADER_LENGTH + dl + 2;  //header + data + crc
+  uint32_t headerEnd = GetHeaderLength(packet);
+  return headerEnd + dl + 2;  //header + data + crc
 }
 
-void SProto::DecryptData(uint8_t* packet)
+void SProto::DecryptData(uint8_t* packet, bool updateHeaderEncrypt, bool updateDataCrc)
 {
+  if (packet[SPROTO_HEADER_POS_STARTBYTE] == SPROTO_STARTBYTEMINI) return;//mini don't encrypt
   if (!SProto::IsValidHeader(packet)) return;
   uint32_t dl = *(uint32_t*)&packet[SPROTO_HEADER_POS_DATALENGTH];
   uint8_t encryption = packet[SPROTO_HEADER_POS_ENCRYPTION];
@@ -253,13 +290,25 @@ void SProto::DecryptData(uint8_t* packet)
   if (encryption == SPROTO_ENCRYPTION_XOR) //simple xor
   {
     SProto::DecryptionXor(&packet[SPROTO_HEADER_LENGTH], dl);
-    return;
   }
-  SProto::DecryptDataImp(packet);
+  else
+  {
+    SProto::DecryptDataImp(packet);
+  }
+  if (updateHeaderEncrypt)
+  {
+      UpdateHeaderEncryption(packet, SPROTO_ENCRYPTION_NONE);
+  }
+  if (updateDataCrc)
+  {
+    UpdateDataCrc(packet);
+  }
+
 }
 
-void SProto::EncryptData(uint8_t* packet)
+void SProto::EncryptData(uint8_t* packet, bool updateDataCrc)
 {
+  if (packet[SPROTO_HEADER_POS_STARTBYTE] == SPROTO_STARTBYTEMINI) return;//mini don't encrypt
   if (!SProto::IsValidHeader(packet)) return;
   uint32_t dl = *(uint32_t*)&packet[SPROTO_HEADER_POS_DATALENGTH];
   uint8_t encryption = packet[SPROTO_HEADER_POS_ENCRYPTION];
@@ -267,9 +316,14 @@ void SProto::EncryptData(uint8_t* packet)
   if (encryption == SPROTO_ENCRYPTION_XOR) //simple xor
   {
     SProto::EncryptionXor(&packet[SPROTO_HEADER_LENGTH], dl);
-    return;
   }
-  SProto::EncryptDataImp(packet);
+  else
+  {
+    SProto::EncryptDataImp(packet);
+  }
+  if (updateDataCrc)
+    UpdateDataCrc(packet);
+  }
 }
 
 void SProto::EncryptionXor(uint8_t* data, uint32_t length)
@@ -489,40 +543,49 @@ void SProto::PrintHeader(uint8_t* packet)
     printf("Invalid header.\n");
     return;
   }
+  if (packet[SPROTO_HEADER_POS_STARTBYTE] == SPROTO_STARTBYTE) printf("Header type: normal\n");
+  if (packet[SPROTO_HEADER_POS_STARTBYTE] == SPROTO_STARTBYTEMINI) printf("Header type: mini\n");
   printf("Proto version: %hhu\n", packet[SPROTO_HEADER_POS_PROTOVER]);
   printf("Data length  : %u\n", *(uint32_t*)&packet[SPROTO_HEADER_POS_DATALENGTH]);
-  uint16_t addr = *(uint16_t*)&packet[SPROTO_HEADER_POS_SRCADDR];
-  if (addr == SPROTO_ADDR_NONE)
+  if (packet[SPROTO_HEADER_POS_STARTBYTE] == SPROTO_STARTBYTE)
   {
-    printf("Src addr not given.\n");
-  }
+    uint16_t addr = *(uint16_t*)&packet[SPROTO_HEADER_POS_SRCADDR];
+    if (addr == SPROTO_ADDR_NONE)
+    {
+      printf("Src addr not given.\n");
+    }
+    else
+    {
+      printf("Src addr : %hu\n", addr);
+    }
+    addr = *(uint16_t*)&packet[SPROTO_HEADER_POS_DSTADDR];
+    if (addr == SPROTO_ADDR_NONE)
+    {
+      printf("Dst addr not given.\n");
+    }
+    else if (addr == SPROTO_ADDR_BROADCAST)
+    {
+      printf("Dst addr is broadcast.\n");
+    }
+    else
+    {
+      printf("Dst addr : %hu\n", addr);
+    }
+    uint8_t enc = packet[SPROTO_HEADER_POS_ENCRYPTION];
+    if (enc == SPROTO_ENCRYPTION_NONE)
+    {
+      printf("Encryption is disabed\n");
+    }
+    else
+    {
+      printf("Encryption : %hhu\n", enc);
+    }
+    printf("Crc        : %hhu\n", packet[SPROTO_HEADER_POS_CRC]);
+  }//end of mini check
   else
   {
-    printf("Src addr : %hu\n", addr);
+    printf("Crc        : %hhu\n", packet[SPROTO_HEADER_POS_CRCMINI]);
   }
-  addr = *(uint16_t*)&packet[SPROTO_HEADER_POS_DSTADDR];
-  if (addr == SPROTO_ADDR_NONE)
-  {
-    printf("Dst addr not given.\n");
-  }
-  else if (addr == SPROTO_ADDR_BROADCAST)
-  {
-    printf("Dst addr is broadcast.\n");
-  }
-  else
-  {
-    printf("Dst addr : %hu\n", addr);
-  }
-  uint8_t enc = packet[SPROTO_HEADER_POS_ENCRYPTION];
-  if (enc == SPROTO_ENCRYPTION_NONE)
-  {
-    printf("Encryption is disabed\n");
-  }
-  else
-  {
-    printf("Encryption : %hhu\n", enc);
-  }
-  printf("Crc        : %hhu\n", packet[SPROTO_HEADER_POS_CRC]);
   //parse the command
   uint16_t cmd = *(uint16_t*)&packet[SPROTO_HEADER_POS_CMD];
   printf("Cmd        : %hu\n", cmd);
@@ -543,9 +606,10 @@ void SProto::PrintMeasDataDetails(uint8_t* packet)
     printf("Not a SPROTO_CMD_CMEAS command packet.\n");
     return;
   }
+  uint32_t headerEnd = GetHeaderLength(packet);
   uint32_t dl = *(uint32_t*)&packet[SPROTO_HEADER_POS_DATALENGTH];
-  uint32_t offset = SPROTO_HEADER_LENGTH;
-  dl += SPROTO_HEADER_LENGTH; //last data byte
+  uint32_t offset = headerEnd;
+  dl += headerEnd; //last data byte
   SPROTO_MEASHEADERSTRUCT dataHead;
   while (offset < dl)
   {

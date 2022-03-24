@@ -35,8 +35,8 @@ void CreateDataPacket()
 void ParseDataPacket()
 {
   uint32_t dl = *(uint32_t*)&packet[SPROTO_HEADER_POS_DATALENGTH];
-  uint32_t offset = SPROTO_HEADER_LENGTH;
-  dl += SPROTO_HEADER_LENGTH; //last data byte
+  uint32_t offset = SProto::GetHeaderLength(packet);
+  dl += offset; //last data byte
   SPROTO_MEASHEADERSTRUCT dataHead;
   while (offset < dl)
   {
@@ -107,11 +107,12 @@ void setup()
   CreateDataPacket();
   //Print debug info about it:
   SProto::PrintMeasDataDetails(packet);
-  //Encrypt it
+  //Encrypt it, by default it'll update the crc, so need to check BEFORE decrypt
   SProto::EncryptData(packet);
-  //Decrypt it
-  SProto::DecryptData(packet);
   //check crc
+  if (SProto::IsValidData(packet)) Serial.println("Packet is valid"); else Serial.println("Invalid packet!");
+  //Decrypt it
+  SProto::DecryptData(packet, true, true); //since decoded, update the header to not encrypted, and also update the crc, to pass the tests after.
   if (SProto::IsValidData(packet)) Serial.println("Packet is valid"); else Serial.println("Invalid packet!");
   
   //Parse and MQTT helper

@@ -28,9 +28,11 @@ class SProto
   public:
     //packet creation
     static uint32_t CreateHeader(uint8_t* packet, uint16_t cmd, uint32_t dataLength = 0, uint8_t  encryption = SPROTO_ENCRYPTION_NONE, uint16_t srcAddr = SPROTO_ADDR_NONE, uint16_t dstAddr = SPROTO_ADDR_BROADCAST);
+    static uint32_t CreateHeaderMini(uint8_t* packet, uint16_t cmd, uint32_t dataLength = 0);
     static void UpdateHeaderDataSize(uint8_t* packet, uint32_t dataLength);
     static void UpdateHeaderEncryption(uint8_t* packet, uint8_t encryption);
     static void UpdateHeaderCrc(uint8_t* packet);
+    static uint32_t GetHeaderLength(uint8_t* packet);
 
     static uint32_t CalculateCommandDataLength(uint16_t cmd);
     static uint32_t CalculateMeasurementDataLength(uint16_t dataType, bool withHeader = true);
@@ -53,12 +55,12 @@ class SProto
       if (!SProto::IsValidHeader(packet)) return 0; //header presents?
       if (SProto::GetCmdFromPacket(packet) != SPROTO_CMD_CMEAS) return 0; //meas packet?
       uint32_t dl = *(uint32_t*)&packet[SPROTO_HEADER_POS_DATALENGTH];
-      uint32_t newdl = dl + MeasAddHeaderAndData(&packet[SPROTO_HEADER_LENGTH + dl], dataType, data, dataSerNum, timeFrame);
+      uint32_t newdl = dl + MeasAddHeaderAndData(&packet[GetHeaderLength(packet) + dl], dataType, data, dataSerNum, timeFrame);
       SProto::UpdateHeaderDataSize(packet, newdl);
       return SProto::UpdateDataCrc(packet);
     }
 
-    static void EncryptData(uint8_t* packet);
+    static void EncryptData(uint8_t* packet, bool updateDataCrc = true);
     static uint32_t UpdateDataCrc(uint8_t* packet);
 
     //packet parse
@@ -66,7 +68,7 @@ class SProto
     static bool IsValidData(uint8_t* packet);
     static bool IsValidPacket(uint8_t* packet);
     static uint32_t GetFullPacketLength(uint8_t* packet);
-    static void DecryptData(uint8_t* packet);
+    static void DecryptData(uint8_t* packet, bool updateHeaderEncrypt = true, bool updateDataCrc = false);
     static bool MeasParseDataPart(uint8_t* packet, uint32_t offset, SPROTO_MEASHEADERSTRUCT* result);
     template <typename  T>
     static uint32_t MeasGetDataPart(uint8_t* packet, uint32_t offset, T* result)
