@@ -113,13 +113,14 @@ void setup()
   if (SProto::IsValidData(packet)) Serial.println("Packet is valid"); else Serial.println("Invalid packet!");
   //Decrypt it
   SProto::DecryptData(packet, true, true); //since decoded, update the header to not encrypted, and also update the crc, to pass the tests after.
+  //check again for validity. can be done, because updated the crc, but this is off by default. so should use only one packet checking.
   if (SProto::IsValidData(packet)) Serial.println("Packet is valid"); else Serial.println("Invalid packet!");
   
   //Parse and MQTT helper
   ParseDataPacket();
 
-  //Create a packet with a Reboot CMD
-  SProto::CreateHeader(packet, SPROTO_CMD_SRESTART, 0 , SPROTO_ENCRYPTION_XOR, MY_ADDR, DEST_ADDR);
+  //Create a mini packet with a Reboot CMD
+  SProto::CreateHeaderMini(packet, SPROTO_CMD_SRESTART, 0);
   uint16_t cmd = SProto::GetCmdFromPacket(packet);
   if (cmd == SPROTO_CMD_SRESTART) Serial.println("Got restart cmd.");
 }

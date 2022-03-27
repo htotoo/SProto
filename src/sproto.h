@@ -68,7 +68,10 @@ class SProto
     static bool IsValidData(uint8_t* packet);
     static bool IsValidPacket(uint8_t* packet);
     static uint32_t GetFullPacketLength(uint8_t* packet);
+    static uint32_t GetDataLength(uint8_t* packet) { return  *(uint32_t*)&packet[SPROTO_HEADER_POS_DATALENGTH]; };
     static void DecryptData(uint8_t* packet, bool updateHeaderEncrypt = true, bool updateDataCrc = false);
+    static uint16_t GetAddrDestination(uint8_t* packet);
+    static uint16_t GetAddrSource(uint8_t* packet);
     static bool MeasParseDataPart(uint8_t* packet, uint32_t offset, SPROTO_MEASHEADERSTRUCT* result);
     template <typename  T>
     static uint32_t MeasGetDataPart(uint8_t* packet, uint32_t offset, T* result)

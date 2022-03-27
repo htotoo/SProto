@@ -31,7 +31,7 @@ uint32_t SProto::CreateHeaderMini(uint8_t* packet, uint16_t cmd, uint32_t dataLe
 
 void SProto::UpdateHeaderDataSize(uint8_t* packet, uint32_t dataLength)
 {
-  packet[SPROTO_HEADER_POS_DATALENGTH] = dataLength;
+  *(uint32_t*)(&packet[SPROTO_HEADER_POS_DATALENGTH]) = dataLength;
   SProto::UpdateHeaderCrc(packet);
 }
 
@@ -249,6 +249,19 @@ bool SProto::IsValidHeader(uint8_t* packet)
   return false;
 }
 
+uint16_t SProto::GetAddrDestination(uint8_t* packet)
+{
+  if (packet[SPROTO_HEADER_POS_STARTBYTE] == SPROTO_STARTBYTEMINI) return SPROTO_ADDR_BROADCAST;
+  return *(uint16_t*)&packet[SPROTO_HEADER_POS_DSTADDR];
+}
+
+uint16_t SProto::GetAddrSource(uint8_t* packet)
+{
+  if (packet[SPROTO_HEADER_POS_STARTBYTE] == SPROTO_STARTBYTE)
+  return *(uint16_t*)&packet[SPROTO_HEADER_POS_SRCADDR];
+}
+
+
 uint32_t SProto::UpdateDataCrc(uint8_t* packet)
 {
   if (!SProto::IsValidHeader(packet)) return 0;
@@ -322,6 +335,7 @@ void SProto::EncryptData(uint8_t* packet, bool updateDataCrc)
     SProto::EncryptDataImp(packet);
   }
   if (updateDataCrc)
+  {
     UpdateDataCrc(packet);
   }
 }
@@ -615,6 +629,7 @@ void SProto::PrintMeasDataDetails(uint8_t* packet)
   {
     SProto::MeasParseDataPart(packet, offset, &dataHead);
     printf("Data meas type: %hu\n", dataHead.measTypeId);
+    printf("Serial: %hu\n", dataHead.serial);
     if (dataHead.measTypeId == SPROTO_MEASID_STAIONNAME)
     {
       SPM_StationName tmp;

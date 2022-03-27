@@ -15,3 +15,5 @@ Feaqtures:
 
 See the example.
 For now, you should edit the config.h if you want to change some parameters.
+
+For real world usage check my LoRa car alarm system project: https://github.com/htotoo/SLoraTracker
