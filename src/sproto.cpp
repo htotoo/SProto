@@ -83,8 +83,14 @@ uint32_t SProto::CalculateCommandDataLength(uint16_t cmd)
 {
   switch (cmd)
   {
+    case SPROTO_CMD_SMEASHIST:
+    case SPROTO_CMD_SSETPARAM:
     case SPROTO_CMD_CMEAS:
       return SPROTO_LENGTH_UNKNOWN;
+
+    case SPROTO_CMD_SRESTART:
+    case SPROTO_CMD_SRESTARTBOOTLOADER:
+    case SPROTO_CMD_SGETSTATIONNAME:
     case SPROTO_CMD_SMEAS:
       return 0;
     default:
@@ -260,8 +266,8 @@ uint16_t SProto::GetAddrDestination(uint8_t* packet)
 
 uint16_t SProto::GetAddrSource(uint8_t* packet)
 {
-  if (packet[SPROTO_HEADER_POS_STARTBYTE] == SPROTO_STARTBYTE)
-  return *(uint16_t*)&packet[SPROTO_HEADER_POS_SRCADDR];
+  if (packet[SPROTO_HEADER_POS_STARTBYTE] == SPROTO_STARTBYTE) return *(uint16_t*)&packet[SPROTO_HEADER_POS_SRCADDR];
+  return SPROTO_ADDR_NONE;
 }
 
 
