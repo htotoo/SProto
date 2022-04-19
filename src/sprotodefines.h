@@ -31,8 +31,12 @@
 #define SPROTO_CMD_SMEASHIST 0x0002
 //server requests the stations name
 #define SPROTO_CMD_SGETSTATIONNAME 0x0003
+//server requests the client to set params. can be used with cmeas packets (eg rgb led)
+#define SPROTO_CMD_SSETPARAM 0x0004
 //server requests the client to reboot
 #define SPROTO_CMD_SRESTART 0xfffe
+//server requests the client to reboot into bootloader
+#define SPROTO_CMD_SRESTARTBOOTLOADER 0xfffd
 
 
 //MEASUREMENT DATA SPECIFIC
@@ -76,6 +80,8 @@
 #define SPROTO_MEASID_CARDID 31
 #define SPROTO_MEASID_RSSI 32
 #define SPROTO_MEASID_SNR 33
+#define SPROTO_MEASID_POWERFACTOR 34
+
 
 #define SPROTO_MEASID_RADSPECTRUM512 100
 #define SPROTO_MEASID_RADSPECTRUM1024 101
@@ -109,6 +115,7 @@ typedef float SPM_GasPpm;  //Gas sensor value in ppm
 typedef float SPM_Voltage; //Voltage
 typedef float SPM_Current; //Ampers
 typedef float SPM_Power;  //Watts
+typedef float SPM_PowerFactor;  //PF
 struct SPM_RGB
 {
   uint8_t r;
