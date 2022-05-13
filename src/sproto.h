@@ -3,7 +3,7 @@
 #define __SPROTO_H
 
 #include "../config.h"
-
+#include <stddef.h>
 #include <stdint.h>
 #ifdef SPROTO_DEBUG
 #include <stdio.h>

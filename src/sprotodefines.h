@@ -81,6 +81,9 @@
 #define SPROTO_MEASID_RSSI 32
 #define SPROTO_MEASID_SNR 33
 #define SPROTO_MEASID_POWERFACTOR 34
+#define SPROTO_MEASID_COUNTER 35
+#define SPROTO_MEASID_RAIN 36
+
 
 
 #define SPROTO_MEASID_RADSPECTRUM512 100
@@ -116,6 +119,8 @@ typedef float SPM_Voltage; //Voltage
 typedef float SPM_Current; //Ampers
 typedef float SPM_Power;  //Watts
 typedef float SPM_PowerFactor;  //PF
+typedef uint32_t SPM_Counter;  //simple counter
+typedef uint16_t SPM_Rain;  //mm
 struct SPM_RGB
 {
   uint8_t r;

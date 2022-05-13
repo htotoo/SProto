@@ -164,7 +164,13 @@ uint32_t SProto::CalculateMeasurementDataLength(uint16_t dataType, bool withHead
     case SPROTO_MEASID_POWER:
       ret += sizeof(SPM_Power);
       break;
-     case SPROTO_MEASID_POWERFACTOR:
+    case SPROTO_MEASID_COUNTER:
+      ret += sizeof(SPM_Counter);
+      break;
+    case SPROTO_MEASID_RAIN:
+      ret += sizeof(SPM_Rain);
+      break;
+    case SPROTO_MEASID_POWERFACTOR:
       ret += sizeof(SPM_PowerFactor);
       break;
     case SPROTO_MEASID_RGB:
@@ -405,6 +411,8 @@ uint8_t SProto::GetHADeviceTypeId(uint16_t dataType)
   if (dataType == SPROTO_MEASID_CURRENT) return SPROTO_MQTT_DEVTYPEID_SENSOR;
   if (dataType == SPROTO_MEASID_POWER) return SPROTO_MQTT_DEVTYPEID_SENSOR;
   if (dataType == SPROTO_MEASID_POWERFACTOR) return SPROTO_MQTT_DEVTYPEID_SENSOR;
+  if (dataType == SPROTO_MEASID_COUNTER) return SPROTO_MQTT_DEVTYPEID_SENSOR;
+  if (dataType == SPROTO_MEASID_RAIN) return SPROTO_MQTT_DEVTYPEID_SENSOR;
   if (dataType == SPROTO_MEASID_RGB) return SPROTO_MQTT_DEVTYPEID_LIGHT;
   if (dataType == SPROTO_MEASID_RGBW) return SPROTO_MQTT_DEVTYPEID_LIGHT;
   if (dataType == SPROTO_MEASID_RGBWW) return SPROTO_MQTT_DEVTYPEID_LIGHT;
@@ -456,6 +464,8 @@ const char* SProto::GetDataTypeStr(uint16_t dataType)
   if (dataType == SPROTO_MEASID_CURRENT) return "current";
   if (dataType == SPROTO_MEASID_POWER) return "power";
   if (dataType == SPROTO_MEASID_POWERFACTOR) return "powerfactor";
+  if (dataType == SPROTO_MEASID_COUNTER) return "counter";
+  if (dataType == SPROTO_MEASID_RAIN) return "rain";
   if (dataType == SPROTO_MEASID_RGB) return "rgb";
   if (dataType == SPROTO_MEASID_RGBW) return "rgbw";
   if (dataType == SPROTO_MEASID_RGBWW) return "rgbww";
@@ -496,6 +506,8 @@ const char* SProto::GetDataTypeUnitStr(uint16_t dataType)
   if (dataType == SPROTO_MEASID_CURRENT) return "A";
   if (dataType == SPROTO_MEASID_POWER) return "W";
   if (dataType == SPROTO_MEASID_POWERFACTOR) return "";
+  if (dataType == SPROTO_MEASID_COUNTER) return "";
+  if (dataType == SPROTO_MEASID_RAIN) return "mm";
   if (dataType == SPROTO_MEASID_RGB) return "";
   if (dataType == SPROTO_MEASID_RGBW) return "";
   if (dataType == SPROTO_MEASID_RGBWW) return "";
@@ -743,6 +755,18 @@ void SProto::PrintMeasDataDetails(uint8_t* packet)
       SPM_PowerFactor tmp;
       SProto::MeasGetDataPart(packet, offset, &tmp);
       printf("Power factor: %.3f\n", tmp);
+    }
+    if (dataHead.measTypeId == SPROTO_MEASID_COUNTER)
+    {
+      SPM_Counter tmp;
+      SProto::MeasGetDataPart(packet, offset, &tmp);
+      printf("Counter: %lu\n", tmp);
+    }
+    if (dataHead.measTypeId == SPROTO_MEASID_RAIN)
+    {
+      SPM_Rain tmp;
+      SProto::MeasGetDataPart(packet, offset, &tmp);
+      printf("Rain: %lu\n", tmp);
     }
     if (dataHead.measTypeId == SPROTO_MEASID_RGB)
     {

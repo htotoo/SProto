@@ -1,6 +1,6 @@
 {
   "name": "SProto",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Communication protocol for IoT devices.",
   "keywords": "SProto",
   "authors":
@@ -16,5 +16,5 @@
   },
   "homepage": "https://github.com/htotoo/SProto.git",
   "frameworks": [ "arduino"],
-  "platforms": "esp32"
+  "platforms": ["esp32", "avr"]
 }
