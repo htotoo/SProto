@@ -103,7 +103,7 @@ class SProtoParseHelper
             m_writePointer = 0;
             m_packetArr[0] = 0;
         }
-    //protected:
+    protected:
         uint8_t* m_packetArr = nullptr;
         uint32_t m_maxSize = 0;
         uint32_t m_writePointer = 0;
