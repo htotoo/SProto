@@ -19,7 +19,9 @@
   (((i) & 0x01ll) ? '1' : '0')
 #endif
 #ifdef SPROTO_MQTTHELPER
+#ifdef ARDUINO
 #include <Arduino.h>
+#endif
 #endif
 #include "sprotodefines.h"
 
