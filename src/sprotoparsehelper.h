@@ -44,9 +44,12 @@ class SProtoParseHelper
             }
             return;
         }
-        bool GotByte(uint8_t b) { //don't call it from interrupt! took too long time, also has more parsing job after return true
-            m_packetArr[m_writePointer] = b;
-            if (m_writePointer+1 < m_maxSize) ++m_writePointer;
+        bool GotByte(uint8_t b, bool fakeData = false) { //don't call it from interrupt! took too long time, also has more parsing job after return true
+            if (!fakeData) //fake data true means just recheck the remaining data
+            {
+                m_packetArr[m_writePointer] = b;
+                if (m_writePointer+1 < m_maxSize) ++m_writePointer;
+            }
             front: 
             if (!hasStart)
             {
@@ -97,11 +100,24 @@ class SProtoParseHelper
                 }
             }
         } 
-        void PacketParsed() {
-            hasStart = false;
-            hasFullHeader = false;
-            m_writePointer = 0;
-            m_packetArr[0] = 0;
+        bool PacketParsed(bool mayHasMore = false) {
+            if (!mayHasMore)
+            {
+                hasStart = false;
+                hasFullHeader = false;
+                m_writePointer = 0;
+                m_packetArr[0] = 0;
+                return false;
+            }
+            else
+            {
+                //if added more bytes than a packet, and not parsed immediately, try to get additional data from the array
+                hasStart = false;
+                hasFullHeader = false;
+                m_packetArr[0] = 0; //skip to next header
+                HandleError();
+                return GotByte(0, true);
+            }
         }
     protected:
         uint8_t* m_packetArr = nullptr;
