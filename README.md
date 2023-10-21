@@ -9,6 +9,7 @@ Feaqtures:
  - Measurement data typed by content, eg Temperature, or Humidity, so content can be identified easily.
  - Helper functions to send data to MQTT broker.
  - Helper class ( SProtoServer ) to keep track of stations and sensors. New and already seen, and also expiration handling.
+ - Helper class ( SProtoParseHelper ) to help parse data from serial / radio, where you won't get the whole paket at once.
 ## This is a work in progress lib, with a lot of limitations! Use with cautions. If you want to improve it, send a PR, or ask for a feature.
 
 ## Usage:
