@@ -236,6 +236,36 @@ uint32_t SProto::CalculateMeasurementDataLength(uint16_t dataType, bool withHead
 	case SPROTO_MEASID_HUMIDITYABS:
       ret += sizeof(SPM_HumidityAbs);
       break;
+	case SPROTO_MEASID_GENERIC_UINT8:
+      ret += sizeof(SPM_Generic_Uint8);
+      break;
+	case SPROTO_MEASID_GENERIC_UINT16:
+      ret += sizeof(SPM_Generic_Uint16);
+      break;
+	case SPROTO_MEASID_GENERIC_UINT32:
+      ret += sizeof(SPM_Generic_Uint32);
+      break;
+	case SPROTO_MEASID_GENERIC_UINT64:
+      ret += sizeof(SPM_Generic_Uint64);
+      break;
+	case SPROTO_MEASID_GENERIC_INT8:
+      ret += sizeof(SPM_Generic_Int8);
+      break;
+	case SPROTO_MEASID_GENERIC_INT16:
+      ret += sizeof(SPM_Generic_Int16);
+      break;
+	case SPROTO_MEASID_GENERIC_INT32:
+      ret += sizeof(SPM_Generic_Int32);
+      break;
+	case SPROTO_MEASID_GENERIC_INT64:
+      ret += sizeof(SPM_Generic_Int64);
+      break;
+	case SPROTO_MEASID_GENERIC_FLOAT:
+      ret += sizeof(SPM_Generic_Float);
+      break;
+	case SPROTO_MEASID_GENERIC_DOUBLE:
+      ret += sizeof(SPM_Generic_Double);
+      break;
 
     case SPROTO_MEASID_INVALID:
       break;
@@ -437,6 +467,7 @@ uint8_t SProto::GetHADeviceTypeId(uint16_t dataType)
   if (dataType == SPROTO_MEASID_CARDID) return SPROTO_MQTT_DEVTYPEID_SENSOR;
   if (dataType == SPROTO_MEASID_RSSI) return SPROTO_MQTT_DEVTYPEID_SENSOR;
   if (dataType == SPROTO_MEASID_SNR) return SPROTO_MQTT_DEVTYPEID_SENSOR;
+  //generic skipped, so will return unknown
   return SPROTO_MQTT_DEVTYPEID_UNKNOWN;
 }
 
@@ -491,6 +522,7 @@ const char* SProto::GetDataTypeStr(uint16_t dataType)
   if (dataType == SPROTO_MEASID_CARDID) return "cardid";
   if (dataType == SPROTO_MEASID_RSSI) return "rssi";
   if (dataType == SPROTO_MEASID_SNR) return "snr";
+  //generic will return unk
   return "unk";
 }
 const char* SProto::GetDataTypeUnitStr(uint16_t dataType)
@@ -534,6 +566,7 @@ const char* SProto::GetDataTypeUnitStr(uint16_t dataType)
   if (dataType == SPROTO_MEASID_CARDID) return "";
   if (dataType == SPROTO_MEASID_RSSI) return "dB";
   if (dataType == SPROTO_MEASID_SNR) return "dB";
+  //generic will return ""
   return "";
 }
 

@@ -94,6 +94,18 @@
 #define SPROTO_MEASID_RADSPECTRUM2048 102
 #define SPROTO_MEASID_RADSPECTRUM4096 103
 
+
+#define SPROTO_MEASID_GENERIC_UINT8 0xffe0
+#define SPROTO_MEASID_GENERIC_UINT16 0xffe1
+#define SPROTO_MEASID_GENERIC_UINT32 0xffe2
+#define SPROTO_MEASID_GENERIC_UINT64 0xffe3
+#define SPROTO_MEASID_GENERIC_INT8 0xffe4
+#define SPROTO_MEASID_GENERIC_INT16 0xffe5
+#define SPROTO_MEASID_GENERIC_INT32 0xffe6
+#define SPROTO_MEASID_GENERIC_INT64 0xffe7
+#define SPROTO_MEASID_GENERIC_FLOAT 0xffe8
+#define SPROTO_MEASID_GENERIC_DOUBLE 0xffe9
+
 #define SPROTO_MEASID_STAIONNAME 0xfffd
 #define SPROTO_MEASID_REMAININGDATA 0xfffe
 #define SPROTO_MEASID_INVALID 0xffff
@@ -167,6 +179,17 @@ typedef uint8_t SPM_SoilMoisure; //soil moisure
 typedef int32_t SPM_Distance; //distance. eg in cm, for ultrasonic distance meters
 typedef int16_t SPM_Rssi; //dB
 typedef float SPM_Snr; //dB 
+typedef uint8_t SPM_Generic_Uint8; //--
+typedef uint16_t SPM_Generic_Uint16; //--
+typedef uint32_t SPM_Generic_Uint32; //--
+typedef uint64_t SPM_Generic_Uint64; //--
+typedef int8_t SPM_Generic_Int8; //--
+typedef int16_t SPM_Generic_Int16; //--
+typedef int32_t SPM_Generic_Int32; //--
+typedef int64_t SPM_Generic_Int64; //--
+typedef float SPM_Generic_Float; //--
+typedef double SPM_Generic_Double; //--
+
 struct SPM_CardId
 {
   char x[20]; //card id. (rfid cards)

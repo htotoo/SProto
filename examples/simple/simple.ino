@@ -8,6 +8,7 @@ uint8_t packet[300];
 #define BROADCAST_ADDR 0xffff
 
 #define HOSTNAME "EXAMPLE_HOST"
+#define STATIONID "station1"
 #define MQTTPREFIX "/root/data/"
 
 
@@ -41,7 +42,7 @@ void ParseDataPacket()
   while (offset < dl)
   {
     SProto::MeasParseDataPart(packet, offset, &dataHead);
-    String mqttTopic = SProto::GetMQTTDataTopic(HOSTNAME, MQTTPREFIX, dataHead.measTypeId, dataHead.serial, dataHead.timeFrame);
+    String mqttTopic = SProto::GetMQTTDataTopic(HOSTNAME, STATIONID, MQTTPREFIX, dataHead.measTypeId, dataHead.serial, dataHead.timeFrame);
     Serial.print("MQTT Topic: "); Serial.println(mqttTopic);
     
     if (dataHead.measTypeId == SPROTO_MEASID_TEMPERATURE)
