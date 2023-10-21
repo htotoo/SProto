@@ -233,6 +233,10 @@ uint32_t SProto::CalculateMeasurementDataLength(uint16_t dataType, bool withHead
     case SPROTO_MEASID_STAIONNAME:
       ret += sizeof(SPM_StationName);
       break;
+	case SPROTO_MEASID_HUMIDITYABS:
+      ret += sizeof(SPM_HumidityAbs);
+      break;
+
     case SPROTO_MEASID_INVALID:
       break;
     default:
@@ -400,6 +404,7 @@ uint8_t SProto::GetHADeviceTypeId(uint16_t dataType)
   if (dataType == SPROTO_MEASID_TEMPERATURE) return SPROTO_MQTT_DEVTYPEID_SENSOR;
   if (dataType == SPROTO_MEASID_PRESSURE) return SPROTO_MQTT_DEVTYPEID_SENSOR;
   if (dataType == SPROTO_MEASID_HUMIDITY) return SPROTO_MQTT_DEVTYPEID_SENSOR;
+  if (dataType == SPROTO_MEASID_HUMIDITYABS) return SPROTO_MQTT_DEVTYPEID_SENSOR;
   if (dataType == SPROTO_MEASID_WINDSPEED) return SPROTO_MQTT_DEVTYPEID_SENSOR;
   if (dataType == SPROTO_MEASID_WINDDIR) return SPROTO_MQTT_DEVTYPEID_SENSOR;
   if (dataType == SPROTO_MEASID_ILLUMINANCE) return SPROTO_MQTT_DEVTYPEID_SENSOR;
@@ -453,6 +458,7 @@ const char* SProto::GetDataTypeStr(uint16_t dataType)
   if (dataType == SPROTO_MEASID_TEMPERATURE) return "temparature";
   if (dataType == SPROTO_MEASID_PRESSURE) return "pressure";
   if (dataType == SPROTO_MEASID_HUMIDITY) return "humidity";
+  if (dataType == SPROTO_MEASID_HUMIDITYABS) return "abshumidity";
   if (dataType == SPROTO_MEASID_WINDSPEED) return "windspeed";
   if (dataType == SPROTO_MEASID_WINDDIR) return "winddir";
   if (dataType == SPROTO_MEASID_ILLUMINANCE) return "illuminance";
@@ -495,6 +501,7 @@ const char* SProto::GetDataTypeUnitStr(uint16_t dataType)
   if (dataType == SPROTO_MEASID_TEMPERATURE) return "°C";
   if (dataType == SPROTO_MEASID_PRESSURE) return "hPa";
   if (dataType == SPROTO_MEASID_HUMIDITY) return "%";
+  if (dataType == SPROTO_MEASID_HUMIDITYABS) return "g/M3";
   if (dataType == SPROTO_MEASID_WINDSPEED) return "mps";
   if (dataType == SPROTO_MEASID_WINDDIR) return "°";
   if (dataType == SPROTO_MEASID_ILLUMINANCE) return "lx";
@@ -689,6 +696,12 @@ void SProto::PrintMeasDataDetails(uint8_t* packet)
       SPM_Humidity tmp;
       SProto::MeasGetDataPart(packet, offset, &tmp);
       printf("Humidity: %.2f\n", tmp / 10.0);
+    }
+	if (dataHead.measTypeId == SPROTO_MEASID_HUMIDITYABS)
+    {
+      SPM_HumidityAbs tmp;
+      SProto::MeasGetDataPart(packet, offset, &tmp);
+      printf("Abs Humidity: %.2f\n", tmp);
     }
     if (dataHead.measTypeId == SPROTO_MEASID_WINDSPEED)
     {

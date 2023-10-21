@@ -86,7 +86,7 @@
 #define SPROTO_MEASID_POWERFACTOR 34
 #define SPROTO_MEASID_COUNTER 35
 #define SPROTO_MEASID_RAIN 36
-
+#define SPROTO_MEASID_HUMIDITYABS 37
 
 
 #define SPROTO_MEASID_RADSPECTRUM512 100
@@ -124,6 +124,7 @@ typedef float SPM_Power;  //Watts
 typedef float SPM_PowerFactor;  //PF
 typedef uint32_t SPM_Counter;  //simple counter
 typedef uint16_t SPM_Rain;  //mm
+typedef float SPM_HumidityAbs;  //g/m3
 struct SPM_RGB
 {
   uint8_t r;
@@ -365,6 +366,7 @@ struct SPM_RadSpect4096 {
 #ifndef SPROTO_ENCRYPTIONPARAM_XOR_SIZE
     #define SPROTO_ENCRYPTIONPARAM_XOR_SIZE 4
 #endif
+
 struct SPROTO_MEASHEADERSTRUCT
 {
   uint16_t measTypeId;
