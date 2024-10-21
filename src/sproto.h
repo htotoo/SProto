@@ -61,6 +61,18 @@ class SProto
       SProto::UpdateHeaderDataSize(packet, newdl);
       return SProto::UpdateDataCrc(packet);
     }
+	
+	template <typename  T>
+    static uint32_t SimpleParameterAdd(uint8_t* packet, uint16_t dataType, T* data, uint8_t dataSerNum = 0)
+    {
+      if (!SProto::IsValidHeader(packet)) return 0; //header presents?
+      if (SProto::GetCmdFromPacket(packet) != SPROTO_CMD_SSETPARAM) return 0; //setparam packet?
+	  uint8_t timeFrame = SPROTO_TIME_INSTANT;
+      uint32_t dl = *(uint32_t*)&packet[SPROTO_HEADER_POS_DATALENGTH];
+      uint32_t newdl = dl + MeasAddHeaderAndData(&packet[GetHeaderLength(packet) + dl], dataType, data, dataSerNum, timeFrame);
+      SProto::UpdateHeaderDataSize(packet, newdl);
+      return SProto::UpdateDataCrc(packet);
+    }
 
     static void EncryptData(uint8_t* packet, bool updateDataCrc = true);
     static uint32_t UpdateDataCrc(uint8_t* packet);
