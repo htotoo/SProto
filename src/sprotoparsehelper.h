@@ -15,9 +15,13 @@
 class SProtoParseHelper
 {
     public:
+        SProtoParseHelper() {m_packetArr = NULL; m_maxSize = 0;};
         SProtoParseHelper(uint8_t* packetArr, uint32_t maxSize) { m_packetArr = packetArr; m_maxSize = maxSize; m_writePointer = 0; }
+        void SetBuffer(uint8_t* packetArr, uint32_t maxSize) { m_packetArr = packetArr; m_maxSize = maxSize; m_writePointer = 0; }
+        uint8_t* GetBuffer() { return m_packetArr; }
         void HandleError()
         {
+          if (!m_packetArr) return;
             //check if there is another start byte. is so, copy it to array's 0 point
             uint32_t delta = 0;
             hasStart = false; //don't set it to true, since the parser will check for it.
@@ -45,6 +49,7 @@ class SProtoParseHelper
             return;
         }
         bool GotByte(uint8_t b, bool fakeData = false) { //don't call it from interrupt! took too long time, also has more parsing job after return true
+            if (!m_packetArr) return false;
             if (!fakeData) //fake data true means just recheck the remaining data
             {
                 m_packetArr[m_writePointer] = b;
@@ -101,6 +106,7 @@ class SProtoParseHelper
             }
         } 
         bool PacketParsed(bool mayHasMore = false) {
+            if (!m_packetArr) return false;
             if (!mayHasMore)
             {
                 hasStart = false;

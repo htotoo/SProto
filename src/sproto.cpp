@@ -104,6 +104,12 @@ uint32_t SProto::CalculateMeasurementDataLength(uint16_t dataType, bool withHead
   if (withHeader) ret += SPROTO_MEASHEADER_LENGTH; //data header added
   switch (dataType)
   {
+    case SPROTO_MEASID_ADDR:
+      ret += sizeof(SPM_ADDR);
+      break;
+    case SPROTO_MEASID_RADIO_CHANNEL:
+      ret += sizeof(SPM_RadioChan);
+      break;
     case SPROTO_MEASID_NETID:
       ret += sizeof(SPM_NetId);
       break;
@@ -429,6 +435,8 @@ void SProto::HelpCopyStationName(SPM_StationName* dest, char* from, size_t len)
 uint8_t SProto::GetHADeviceTypeId(uint16_t dataType)
 {
   if (dataType == SPROTO_MEASID_STAIONNAME) return SPROTO_MQTT_DEVTYPEID_SENSOR;
+  if (dataType == SPROTO_MEASID_ADDR) return SPROTO_MQTT_DEVTYPEID_UNKNOWN;
+  if (dataType == SPROTO_MEASID_RADIO_CHANNEL) return SPROTO_MQTT_DEVTYPEID_UNKNOWN;
   if (dataType == SPROTO_MEASID_NETID) return SPROTO_MQTT_DEVTYPEID_UNKNOWN;
   if (dataType == SPROTO_MEASID_TIME) return SPROTO_MQTT_DEVTYPEID_SENSOR;
   if (dataType == SPROTO_MEASID_TEMPERATURE) return SPROTO_MQTT_DEVTYPEID_SENSOR;
@@ -484,7 +492,9 @@ const char* SProto::GetHADevStringByHaDevType(uint8_t devType)
 const char* SProto::GetDataTypeStr(uint16_t dataType)
 {
   if (dataType == SPROTO_MEASID_STAIONNAME) return "stationname";
+  if (dataType == SPROTO_MEASID_ADDR) return "addr";
   if (dataType == SPROTO_MEASID_NETID) return "netid";
+  if (dataType == SPROTO_MEASID_RADIO_CHANNEL) return "r.chan";
   if (dataType == SPROTO_MEASID_TIME) return "time";
   if (dataType == SPROTO_MEASID_TEMPERATURE) return "temparature";
   if (dataType == SPROTO_MEASID_PRESSURE) return "pressure";
@@ -528,7 +538,9 @@ const char* SProto::GetDataTypeStr(uint16_t dataType)
 const char* SProto::GetDataTypeUnitStr(uint16_t dataType)
 {
   if (dataType == SPROTO_MEASID_STAIONNAME) return "";
+  if (dataType == SPROTO_MEASID_ADDR) return "";
   if (dataType == SPROTO_MEASID_NETID) return "";
+  if (dataType == SPROTO_MEASID_RADIO_CHANNEL) return "";
   if (dataType == SPROTO_MEASID_TIME) return "";
   if (dataType == SPROTO_MEASID_TEMPERATURE) return "°C";
   if (dataType == SPROTO_MEASID_PRESSURE) return "hPa";
@@ -705,6 +717,18 @@ void SProto::PrintMeasDataDetails(uint8_t* packet)
       SPM_NetId tmp;
       SProto::MeasGetDataPart(packet, offset, &tmp);
       printf("Network ID: %02X %02X %02X %02X %02X %02X\n", tmp.x[0], tmp.x[1], tmp.x[2], tmp.x[3], tmp.x[4], tmp.x[5]);
+    }
+    if (dataHead.measTypeId == SPROTO_MEASID_ADDR)
+    {
+      SPM_ADDR tmp;
+      SProto::MeasGetDataPart(packet, offset, &tmp);
+      printf("ADDR: %hu\n", tmp);
+    }
+    if (dataHead.measTypeId == SPROTO_MEASID_RADIO_CHANNEL)
+    {
+      SPM_RadioChan tmp;
+      SProto::MeasGetDataPart(packet, offset, &tmp);
+      printf("R.Chan: %hu\n", tmp);
     }
     if (dataHead.measTypeId == SPROTO_MEASID_TIME)
     {

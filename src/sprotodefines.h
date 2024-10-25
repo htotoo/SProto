@@ -87,7 +87,8 @@
 #define SPROTO_MEASID_COUNTER 35
 #define SPROTO_MEASID_RAIN 36
 #define SPROTO_MEASID_HUMIDITYABS 37
-
+#define SPROTO_MEASID_RADIO_CHANNEL 38
+#define SPROTO_MEASID_ADDR 39
 
 #define SPROTO_MEASID_RADSPECTRUM512 100
 #define SPROTO_MEASID_RADSPECTRUM1024 101
@@ -119,6 +120,8 @@ struct SPM_StationName
 struct SPM_NetId {
   uint8_t x[6];
 }; //6 byte network id
+typedef uint16_t SPM_ADDR;  // any address
+typedef uint16_t SPM_RadioChan;  // radio channel
 typedef uint64_t SPM_Time;  //8 byte unix time
 typedef float SPM_Temperature; //celsius
 typedef float SPM_Pressure; //hpa
